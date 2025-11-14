@@ -29,7 +29,7 @@ public class DynamicMockController {
         if (endpoint != null) {
             return ResponseEntity
                     .status(endpoint.getStatusCode())
-                    .header("Content-Type", "application/json")
+                    .header("Content-Type", endpoint.getContentType())
                     .body(endpoint.getResponse());
         } else {
             return ResponseEntity.notFound().build();

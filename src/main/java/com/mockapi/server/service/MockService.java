@@ -13,11 +13,15 @@ public class MockService {
     private final Map<String, MockEndpoint> mockEndpoints = new ConcurrentHashMap<>();
 
     public void addMock(String path, String method, String response) {
-        addMock(path, method, 200, response);
+        addMock(path, method, 200, response, "application/json");
     }
 
     public void addMock(String path, String method, int statusCode, String response) {
-        mockEndpoints.put(path + "_" + method, new MockEndpoint(path, method, statusCode, response));
+        addMock(path, method, statusCode, response, "application/json");
+    }
+
+    public void addMock(String path, String method, int statusCode, String response, String contentType) {
+        mockEndpoints.put(path + "_" + method, new MockEndpoint(path, method, statusCode, response, contentType));
     }
 
     public String getMockResponse(String path, String method) {

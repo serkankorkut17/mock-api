@@ -68,7 +68,7 @@ public class MockApiFrame extends JFrame {
 
         // Window configuration
         setTitle("🚀 Mock API Manager");
-        setSize(900, 700);
+        setSize(1100, 750);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null); // Center on screen
 
@@ -224,15 +224,16 @@ public class MockApiFrame extends JFrame {
 
         // Small prettify button overlay in bottom-right corner
         JButton prettifyButton = new JButton("✨");
-        prettifyButton.setFont(new Font(UI_FONT, Font.PLAIN, 10));
+        prettifyButton.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 14));
         prettifyButton.setBackground(new Color(103, 58, 183));
         prettifyButton.setForeground(Color.WHITE);
         prettifyButton.setFocusPainted(false);
         prettifyButton.setToolTipText("Format JSON");
         prettifyButton.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(81, 45, 168)),
-            new EmptyBorder(3, 8, 3, 8)
+            new EmptyBorder(5, 10, 5, 10)
         ));
+        prettifyButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         prettifyButton.addActionListener(e -> {
             try {
                 String formatted = prettifyJson(jsonArea.getText());
@@ -281,6 +282,7 @@ public class MockApiFrame extends JFrame {
             BorderFactory.createLineBorder(new Color(200, 200, 200)),
             new EmptyBorder(8, 20, 8, 20)
         ));
+        clearButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         clearButton.addActionListener(e -> {
             pathField.setText("/api/");
             methodBox.setSelectedIndex(0);
@@ -289,7 +291,7 @@ public class MockApiFrame extends JFrame {
         });
 
         JButton addButton = new JButton("✓ Add Mock");
-        addButton.setFont(new Font(UI_FONT, Font.BOLD, 12));
+        addButton.setFont(new Font("Segoe UI Symbol", Font.BOLD, 12));
         addButton.setBackground(new Color(76, 175, 80));
         addButton.setForeground(Color.WHITE);
         addButton.setFocusPainted(false);
@@ -297,6 +299,7 @@ public class MockApiFrame extends JFrame {
             BorderFactory.createLineBorder(new Color(56, 142, 60)),
             new EmptyBorder(8, 25, 8, 25)
         ));
+        addButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         addButton.addActionListener(e -> {
             String path = pathField.getText().trim();
             String method = (String) methodBox.getSelectedItem();
@@ -311,10 +314,10 @@ public class MockApiFrame extends JFrame {
 
             mockService.addMock(path, method, statusCode, json);
 
-            System.out.println("🔍 DEBUG: Mock added - " + method + " " + path + " (Status: " + statusCode + ")");
-            System.out.println("🔍 DEBUG: Total endpoints now: " + mockService.getMocksList().size());
+            System.out.println("DEBUG: Mock added - " + method + " " + path + " (Status: " + statusCode + ")");
+            System.out.println("DEBUG: Total endpoints now: " + mockService.getMocksList().size());
 
-            String logMessage = String.format("✓ Mock added: %s %s → %d\n", method, path, statusCode);
+            String logMessage = String.format("✅ Mock added: %s %s → %d\n", method, path, statusCode);
             logArea.append(logMessage);
             logArea.setCaretPosition(logArea.getDocument().getLength());
 
@@ -470,15 +473,16 @@ public class MockApiFrame extends JFrame {
 
         // Small prettify button overlay in bottom-right corner
         JButton rabbitPrettifyButton = new JButton("✨");
-        rabbitPrettifyButton.setFont(new Font(UI_FONT, Font.PLAIN, 10));
+        rabbitPrettifyButton.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 14));
         rabbitPrettifyButton.setBackground(new Color(103, 58, 183));
         rabbitPrettifyButton.setForeground(Color.WHITE);
         rabbitPrettifyButton.setFocusPainted(false);
         rabbitPrettifyButton.setToolTipText("Format JSON");
         rabbitPrettifyButton.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(81, 45, 168)),
-            new EmptyBorder(3, 8, 3, 8)
+            new EmptyBorder(5, 10, 5, 10)
         ));
+        rabbitPrettifyButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         rabbitPrettifyButton.addActionListener(e -> {
             try {
                 String formatted = prettifyJson(rabbitMessageArea.getText());
@@ -527,6 +531,7 @@ public class MockApiFrame extends JFrame {
             BorderFactory.createLineBorder(new Color(200, 200, 200)),
             new EmptyBorder(8, 20, 8, 20)
         ));
+        clearButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         clearButton.addActionListener(e -> {
             queueField.setText("test-queue");
             vhostField.setText("cert");
@@ -535,8 +540,8 @@ public class MockApiFrame extends JFrame {
             rabbitMessageArea.setText("{\n  \"message\": \"Hello\"\n}");
         });
 
-        JButton sendButton = new JButton("📤 Send Message");
-        sendButton.setFont(new Font(UI_FONT, Font.BOLD, 12));
+        JButton sendButton = new JButton("→ Send Message");
+        sendButton.setFont(new Font("Segoe UI Symbol", Font.BOLD, 12));
         sendButton.setBackground(new Color(255, 87, 34));
         sendButton.setForeground(Color.WHITE);
         sendButton.setFocusPainted(false);
@@ -544,6 +549,7 @@ public class MockApiFrame extends JFrame {
             BorderFactory.createLineBorder(new Color(230, 74, 25)),
             new EmptyBorder(8, 25, 8, 25)
         ));
+        sendButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         sendButton.addActionListener(e -> {
             String queue = queueField.getText().trim();
             String vhost = vhostField.getText().trim();
@@ -866,7 +872,7 @@ public class MockApiFrame extends JFrame {
 
         // Toggle button
         endpointsToggleButton = new JButton("▶ Expand - Registered Endpoints (0)");
-        endpointsToggleButton.setFont(new Font(UI_FONT, Font.PLAIN, 11));
+        endpointsToggleButton.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 11));
         endpointsToggleButton.setBackground(new Color(245, 245, 245));
         endpointsToggleButton.setFocusPainted(false);
         endpointsToggleButton.setBorder(BorderFactory.createCompoundBorder(
@@ -874,17 +880,20 @@ public class MockApiFrame extends JFrame {
             new EmptyBorder(5, 10, 5, 10)
         ));
         endpointsToggleButton.setHorizontalAlignment(SwingConstants.LEFT);
+        endpointsToggleButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         // List panel (initially hidden)
         JPanel listPanel = new JPanel();
         listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
-        listPanel.setBackground(Color.WHITE);
+        listPanel.setBackground(new Color(248, 249, 250));
+        listPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         JScrollPane scrollPane = new JScrollPane(listPanel);
-        scrollPane.setPreferredSize(new Dimension(400, 150));
-        scrollPane.setMinimumSize(new Dimension(200, 100));
-        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(200, 200, 200)));
+        scrollPane.setPreferredSize(new Dimension(500, 200));
+        scrollPane.setMinimumSize(new Dimension(400, 150));
+        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 225)));
         scrollPane.setVisible(false);
+        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
         // Toggle action
         endpointsToggleButton.addActionListener(e -> {
@@ -895,7 +904,7 @@ public class MockApiFrame extends JFrame {
                 // Expand - refresh list
                 listPanel.removeAll();
                 List<MockEndpoint> endpoints = mockService.getMocksList();
-                System.out.println("🔍 DEBUG: Expanding endpoints list. Count: " + endpoints.size());
+                System.out.println("DEBUG: Expanding endpoints list. Count: " + endpoints.size());
                 for (MockEndpoint ep : endpoints) {
                     System.out.println("  - " + ep.getMethod() + " " + ep.getPath() + " (Status: " + ep.getStatusCode() + ")");
                 }
@@ -909,39 +918,109 @@ public class MockApiFrame extends JFrame {
                     listPanel.add(emptyLabel);
                 } else {
                     for (MockEndpoint endpoint : endpoints) {
-                        JPanel itemPanel = new JPanel(new BorderLayout(5, 5));
-                        itemPanel.setBackground(Color.WHITE);
+                        JPanel itemPanel = new JPanel(new BorderLayout(10, 5));
+                        itemPanel.setBackground(new Color(250, 250, 252));
                         itemPanel.setBorder(BorderFactory.createCompoundBorder(
-                            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(230, 230, 230)),
-                            new EmptyBorder(8, 10, 8, 10)
+                            BorderFactory.createLineBorder(new Color(220, 220, 225), 1),
+                            new EmptyBorder(12, 15, 12, 15)
                         ));
+                        itemPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
+
+                        // Hover effect
+                        itemPanel.addMouseListener(new java.awt.event.MouseAdapter() {
+                            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                                itemPanel.setBackground(new Color(245, 247, 250));
+                                itemPanel.setBorder(BorderFactory.createCompoundBorder(
+                                    BorderFactory.createLineBorder(new Color(63, 81, 181), 1),
+                                    new EmptyBorder(12, 15, 12, 15)
+                                ));
+                            }
+                            public void mouseExited(java.awt.event.MouseEvent evt) {
+                                itemPanel.setBackground(new Color(250, 250, 252));
+                                itemPanel.setBorder(BorderFactory.createCompoundBorder(
+                                    BorderFactory.createLineBorder(new Color(220, 220, 225), 1),
+                                    new EmptyBorder(12, 15, 12, 15)
+                                ));
+                            }
+                        });
+
+                        // Left panel with method badge
+                        JPanel leftPanel = new JPanel(new BorderLayout(10, 0));
+                        leftPanel.setOpaque(false);
+
+                        // Method badge
+                        JLabel methodBadge = new JLabel(endpoint.getMethod());
+                        methodBadge.setFont(new Font(UI_FONT, Font.BOLD, 10));
+                        methodBadge.setHorizontalAlignment(SwingConstants.CENTER);
+                        methodBadge.setOpaque(true);
+                        methodBadge.setBorder(new EmptyBorder(4, 8, 4, 8));
+
+                        // Color based on method
+                        switch (endpoint.getMethod()) {
+                            case "GET":
+                                methodBadge.setBackground(new Color(76, 175, 80));
+                                break;
+                            case "POST":
+                                methodBadge.setBackground(new Color(33, 150, 243));
+                                break;
+                            case "PUT":
+                                methodBadge.setBackground(new Color(255, 152, 0));
+                                break;
+                            case "DELETE":
+                                methodBadge.setBackground(new Color(244, 67, 54));
+                                break;
+                            case "PATCH":
+                                methodBadge.setBackground(new Color(156, 39, 176));
+                                break;
+                            default:
+                                methodBadge.setBackground(new Color(96, 125, 139));
+                        }
+                        methodBadge.setForeground(Color.WHITE);
+
+                        leftPanel.add(methodBadge, BorderLayout.WEST);
 
                         // Info panel
                         JPanel infoPanel = new JPanel();
                         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
-                        infoPanel.setBackground(Color.WHITE);
+                        infoPanel.setOpaque(false);
 
-                        JLabel methodPathLabel = new JLabel(endpoint.getMethod() + " " + endpoint.getPath());
-                        methodPathLabel.setFont(new Font(MONO_FONT, Font.BOLD, 12));
-                        methodPathLabel.setForeground(new Color(33, 150, 243));
+                        JLabel pathLabel = new JLabel(endpoint.getPath());
+                        pathLabel.setFont(new Font(MONO_FONT, Font.BOLD, 13));
+                        pathLabel.setForeground(new Color(33, 33, 33));
 
-                        JLabel statusLabel = new JLabel("Status: " + endpoint.getStatusCode());
-                        statusLabel.setFont(new Font(UI_FONT, Font.PLAIN, 10));
-                        statusLabel.setForeground(Color.GRAY);
+                        JLabel detailsLabel = new JLabel(String.format("Status: %d  •  Content-Type: %s",
+                            endpoint.getStatusCode(),
+                            endpoint.getContentType() != null ? endpoint.getContentType() : "application/json"));
+                        detailsLabel.setFont(new Font(UI_FONT, Font.PLAIN, 10));
+                        detailsLabel.setForeground(new Color(117, 117, 117));
 
-                        infoPanel.add(methodPathLabel);
-                        infoPanel.add(statusLabel);
+                        infoPanel.add(pathLabel);
+                        infoPanel.add(Box.createVerticalStrut(3));
+                        infoPanel.add(detailsLabel);
 
-                        // Delete button
-                        JButton deleteBtn = new JButton("🗑️ Delete");
-                        deleteBtn.setFont(new Font(UI_FONT, Font.PLAIN, 10));
+                        leftPanel.add(infoPanel, BorderLayout.CENTER);
+
+                        // Delete button with modern design
+                        JButton deleteBtn = new JButton("✕");
+                        deleteBtn.setFont(new Font("Segoe UI Symbol", Font.BOLD, 18));
+                        deleteBtn.setPreferredSize(new Dimension(36, 36));
                         deleteBtn.setBackground(new Color(244, 67, 54));
                         deleteBtn.setForeground(Color.WHITE);
                         deleteBtn.setFocusPainted(false);
-                        deleteBtn.setBorder(BorderFactory.createCompoundBorder(
-                            BorderFactory.createLineBorder(new Color(211, 47, 47)),
-                            new EmptyBorder(4, 12, 4, 12)
-                        ));
+                        deleteBtn.setBorder(BorderFactory.createEmptyBorder());
+                        deleteBtn.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+                        deleteBtn.setToolTipText("Delete this endpoint");
+
+                        // Hover effect for delete button
+                        deleteBtn.addMouseListener(new java.awt.event.MouseAdapter() {
+                            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                                deleteBtn.setBackground(new Color(211, 47, 47));
+                            }
+                            public void mouseExited(java.awt.event.MouseEvent evt) {
+                                deleteBtn.setBackground(new Color(244, 67, 54));
+                            }
+                        });
+
                         deleteBtn.addActionListener(evt -> {
                             int confirm = JOptionPane.showConfirmDialog(this,
                                 "Are you sure you want to delete this endpoint?\n\n" +
@@ -964,9 +1043,10 @@ public class MockApiFrame extends JFrame {
                             }
                         });
 
-                        itemPanel.add(infoPanel, BorderLayout.CENTER);
+                        itemPanel.add(leftPanel, BorderLayout.CENTER);
                         itemPanel.add(deleteBtn, BorderLayout.EAST);
                         listPanel.add(itemPanel);
+                        listPanel.add(Box.createVerticalStrut(8)); // Space between items
                     }
                 }
 
@@ -997,7 +1077,7 @@ public class MockApiFrame extends JFrame {
 
         // Toggle button
         messagesToggleButton = new JButton("▶ Expand - Sent Messages (0)");
-        messagesToggleButton.setFont(new Font(UI_FONT, Font.PLAIN, 11));
+        messagesToggleButton.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 11));
         messagesToggleButton.setBackground(new Color(245, 245, 245));
         messagesToggleButton.setFocusPainted(false);
         messagesToggleButton.setBorder(BorderFactory.createCompoundBorder(
@@ -1005,6 +1085,7 @@ public class MockApiFrame extends JFrame {
             new EmptyBorder(5, 10, 5, 10)
         ));
         messagesToggleButton.setHorizontalAlignment(SwingConstants.LEFT);
+        messagesToggleButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         // List panel (initially hidden)
         JPanel listPanel = new JPanel();
@@ -1048,7 +1129,7 @@ public class MockApiFrame extends JFrame {
                         infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
                         infoPanel.setBackground(Color.WHITE);
 
-                        JLabel destLabel = new JLabel("📤 " + message.getDestination());
+                        JLabel destLabel = new JLabel(message.getDestination());
                         destLabel.setFont(new Font(MONO_FONT, Font.BOLD, 11));
                         destLabel.setForeground(new Color(255, 87, 34));
 
