@@ -2,6 +2,9 @@ package com.mockapi.server.ui;
 
 import com.mockapi.server.service.MockService;
 import com.mockapi.server.service.RabbitMQService;
+import com.mockapi.server.service.TemplateService;
+import com.mockapi.server.service.TemplateCategory;
+import com.mockapi.server.service.EndpointTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.context.annotation.Profile;
 
@@ -21,8 +24,15 @@ import com.mockapi.server.service.MockEndpoint;
 @Profile("ui")
 public class MockApiFrame extends JFrame {
 
-    private static final ObjectMapper objectMapper = new ObjectMapper()
-            .enable(SerializationFeature.INDENT_OUTPUT);
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    static {
+        // Configure ObjectMapper with proper indentation (no space before colon)
+        com.fasterxml.jackson.core.util.DefaultPrettyPrinter printer = new com.fasterxml.jackson.core.util.DefaultPrettyPrinter();
+        printer.indentArraysWith(com.fasterxml.jackson.core.util.DefaultIndenter.SYSTEM_LINEFEED_INSTANCE);
+        objectMapper.setDefaultPrettyPrinter(printer);
+        objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+    }
 
     // Platform-specific font names
     private static final String UI_FONT = getSystemUIFont();
@@ -30,9 +40,17 @@ public class MockApiFrame extends JFrame {
 
     private final MockService mockService;
     private final RabbitMQService rabbitMQService;
+    private final TemplateService templateService;
     private JTextArea logArea;
     private JButton endpointsToggleButton;
     private JButton messagesToggleButton;
+
+    // Form fields for template population
+    private JTextField pathField;
+    private JComboBox<String> methodBox;
+    private JComboBox<String> statusBox;
+    private JComboBox<String> contentTypeBox;
+    private JTextArea jsonArea;
 
     /**
      * Get platform-specific UI font
@@ -62,9 +80,10 @@ public class MockApiFrame extends JFrame {
         }
     }
 
-    public MockApiFrame(MockService mockService, RabbitMQService rabbitMQService) {
+    public MockApiFrame(MockService mockService, RabbitMQService rabbitMQService, TemplateService templateService) {
         this.mockService = mockService;
         this.rabbitMQService = rabbitMQService;
+        this.templateService = templateService;
 
         // Window configuration
         setTitle("🚀 Mock API Manager");
@@ -140,12 +159,17 @@ public class MockApiFrame extends JFrame {
             new EmptyBorder(10, 10, 10, 10)
         ));
 
+        // Create template menu once for all fields
+        JPopupMenu templateMenu = createTemplateMenu();
+
         // Fields panel
         JPanel fieldsPanel = new JPanel(new GridBagLayout());
         fieldsPanel.setBackground(Color.WHITE);
+        fieldsPanel.setComponentPopupMenu(templateMenu);
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.anchor = GridBagConstraints.WEST;
 
         // Path field
         gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0;
@@ -154,13 +178,14 @@ public class MockApiFrame extends JFrame {
         fieldsPanel.add(pathLabel, gbc);
 
         gbc.gridx = 1; gbc.weightx = 1;
-        JTextField pathField = new JTextField("/api/test");
+        pathField = new JTextField("/api/test");
         pathField.setFont(new Font(MONO_FONT, Font.PLAIN, 12));
         pathField.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(200, 200, 200)),
             new EmptyBorder(5, 8, 5, 8)
         ));
         addUndoRedoSupport(pathField);
+        pathField.setComponentPopupMenu(templateMenu);
         fieldsPanel.add(pathField, gbc);
 
         // Method field
@@ -170,8 +195,9 @@ public class MockApiFrame extends JFrame {
         fieldsPanel.add(methodLabel, gbc);
 
         gbc.gridx = 1; gbc.weightx = 1;
-        JComboBox<String> methodBox = new JComboBox<>(new String[]{"GET", "POST", "PUT", "DELETE", "PATCH"});
+        methodBox = new JComboBox<>(new String[]{"GET", "POST", "PUT", "DELETE", "PATCH"});
         methodBox.setFont(new Font(UI_FONT, Font.PLAIN, 12));
+        methodBox.setComponentPopupMenu(templateMenu);
         fieldsPanel.add(methodBox, gbc);
 
         // Status Code field
@@ -181,10 +207,7 @@ public class MockApiFrame extends JFrame {
         fieldsPanel.add(statusLabel, gbc);
 
         gbc.gridx = 1; gbc.weightx = 1;
-        JPanel statusPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        statusPanel.setBackground(Color.WHITE);
-
-        JComboBox<String> statusBox = new JComboBox<>(new String[]{
+        statusBox = new JComboBox<>(new String[]{
             "200 - OK",
             "201 - Created",
             "204 - No Content",
@@ -195,11 +218,30 @@ public class MockApiFrame extends JFrame {
             "500 - Internal Server Error"
         });
         statusBox.setFont(new Font(UI_FONT, Font.PLAIN, 12));
-        statusPanel.add(statusBox);
-        fieldsPanel.add(statusPanel, gbc);
+        statusBox.setComponentPopupMenu(templateMenu);
+        fieldsPanel.add(statusBox, gbc);
+
+        // Content-Type field
+        gbc.gridx = 0; gbc.gridy = 3; gbc.weightx = 0;
+        JLabel contentTypeLabel = new JLabel("Content-Type:");
+        contentTypeLabel.setFont(new Font(UI_FONT, Font.BOLD, 12));
+        fieldsPanel.add(contentTypeLabel, gbc);
+
+        gbc.gridx = 1; gbc.weightx = 1;
+        contentTypeBox = new JComboBox<>(new String[]{
+            "application/json",
+            "application/x-www-form-urlencoded",
+            "application/xml",
+            "text/plain",
+            "text/html",
+            "multipart/form-data"
+        });
+        contentTypeBox.setFont(new Font(UI_FONT, Font.PLAIN, 12));
+        contentTypeBox.setComponentPopupMenu(templateMenu);
+        fieldsPanel.add(contentTypeBox, gbc);
 
         // Response JSON field
-        gbc.gridx = 0; gbc.gridy = 3; gbc.weightx = 0; gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.gridx = 0; gbc.gridy = 4; gbc.weightx = 0; gbc.anchor = GridBagConstraints.NORTHWEST;
         JLabel jsonLabel = new JLabel("Response JSON:");
         jsonLabel.setFont(new Font(UI_FONT, Font.BOLD, 12));
         fieldsPanel.add(jsonLabel, gbc);
@@ -209,8 +251,9 @@ public class MockApiFrame extends JFrame {
         // Container with relative positioning for overlay button
         JPanel jsonContainer = new JPanel(new BorderLayout());
         jsonContainer.setBackground(Color.WHITE);
+        jsonContainer.setComponentPopupMenu(templateMenu);
 
-        JTextArea jsonArea = new JTextArea(8, 30);
+        jsonArea = new JTextArea(8, 30);
         jsonArea.setText("{\n  \"status\": \"success\",\n  \"message\": \"Hello from Mock API\",\n  \"timestamp\": \"2025-11-13T10:00:00Z\"\n}");
         jsonArea.setFont(new Font(MONO_FONT, Font.PLAIN, 12));
         jsonArea.setLineWrap(true);
@@ -306,13 +349,14 @@ public class MockApiFrame extends JFrame {
             String statusText = (String) statusBox.getSelectedItem();
             int statusCode = Integer.parseInt(statusText.split(" ")[0]);
             String json = jsonArea.getText().trim();
+            String contentType = (String) contentTypeBox.getSelectedItem();
 
             if (path.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Path cannot be empty!", "Validation Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            mockService.addMock(path, method, statusCode, json);
+            mockService.addMock(path, method, statusCode, json, contentType);
 
             System.out.println("DEBUG: Mock added - " + method + " " + path + " (Status: " + statusCode + ")");
             System.out.println("DEBUG: Total endpoints now: " + mockService.getMocksList().size());
@@ -1170,4 +1214,106 @@ public class MockApiFrame extends JFrame {
 
         return container;
     }
+
+    /**
+     * Creates a popup menu with template categories and endpoints
+     */
+    private JPopupMenu createTemplateMenu() {
+        JPopupMenu popupMenu = new JPopupMenu();
+        popupMenu.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 12));
+
+        // Add title
+        JMenuItem titleItem = new JMenuItem("📋 Endpoint Templates");
+        titleItem.setFont(new Font("Segoe UI Symbol", Font.BOLD, 12));
+        titleItem.setEnabled(false);
+        popupMenu.add(titleItem);
+        popupMenu.addSeparator();
+
+        // Add categories
+        List<TemplateCategory> categories = templateService.getCategories();
+
+        if (categories.isEmpty()) {
+            JMenuItem emptyItem = new JMenuItem("No templates available");
+            emptyItem.setEnabled(false);
+            popupMenu.add(emptyItem);
+        } else {
+            for (TemplateCategory category : categories) {
+                JMenu categoryMenu = new JMenu(category.getIcon() + " " + category.getName());
+                categoryMenu.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 12));
+
+                for (EndpointTemplate template : category.getEndpoints()) {
+                    // Show only path as menu item text (cleaner look)
+                    String displayText = template.getPath();
+                    JMenuItem templateItem = new JMenuItem(displayText);
+                    templateItem.setFont(new Font(MONO_FONT, Font.PLAIN, 11));
+
+                    // Set tooltip with full details including method and status
+                    String method = template.getMethod();
+                    templateItem.setToolTipText(String.format(
+                        "<html><b>%s</b> %s<br>Status: %d<br>Click to load</html>",
+                        method, template.getPath(), template.getStatusCode()
+                    ));
+
+                    // Add action listener to populate form fields
+                    templateItem.addActionListener(e -> populateFormWithTemplate(template));
+
+                    categoryMenu.add(templateItem);
+                }
+
+                popupMenu.add(categoryMenu);
+            }
+        }
+
+        return popupMenu;
+    }
+
+    /**
+     * Populates the form fields with template data
+     */
+    private void populateFormWithTemplate(EndpointTemplate template) {
+        // Set path
+        pathField.setText(template.getPath());
+
+        // Set method
+        methodBox.setSelectedItem(template.getMethod());
+
+        // Set status code
+        String statusText = template.getStatusCode() + " - ";
+        for (int i = 0; i < statusBox.getItemCount(); i++) {
+            String item = statusBox.getItemAt(i);
+            if (item.startsWith(statusText)) {
+                statusBox.setSelectedIndex(i);
+                break;
+            }
+        }
+
+        // Set content-type (default to application/json if not specified)
+        String contentType = template.getContentType();
+        if (contentType == null || contentType.isEmpty()) {
+            contentType = "application/json";
+        }
+        contentTypeBox.setSelectedItem(contentType);
+
+        // Set response JSON - prettify if it's JSON
+        String response = template.getResponse();
+        if (contentType.contains("json")) {
+            try {
+                // Try to prettify JSON
+                String prettified = prettifyJson(response);
+                jsonArea.setText(prettified);
+            } catch (Exception ex) {
+                // If prettify fails, use original
+                jsonArea.setText(response);
+            }
+        } else {
+            // For non-JSON content types, use as-is
+            jsonArea.setText(response);
+        }
+
+        // Log
+        logArea.append(String.format("📋 Template loaded: %s %s\n", template.getMethod(), template.getPath()));
+        logArea.setCaretPosition(logArea.getDocument().getLength());
+    }
 }
+
+

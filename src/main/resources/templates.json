@@ -1,0 +1,49 @@
+[
+  {
+    "name": "Authorization",
+    "icon": "🔐",
+    "endpoints": [
+      {
+        "path": "/oauth-provider/oauth2/token",
+        "method": "POST",
+        "statusCode": 200,
+        "contentType": "application/json",
+        "response": "{\n  \"token_type\": \"Bearer\",\n  \"access_token\": \"AAIgMDc3MThmNGVlYzBhNjBhOWRhMjAyYTZkMDgwNGQ2NWOww7pi73ofnGEEmFDXua-V0jSXMmh-tzY2rI6_tGH4dhQ8utJJVYvZZQDVjEjb1eWVaZKzib91VpgZQRGy2Id1W_SyOIyKmaFNgqYWdYkZ0VhRldDcX87N2avsd1_g0qE\",\n  \"scope\": \"gks_read gks_write\",\n  \"expires_in\": 3600,\n  \"consented_on\": 1594267106\n}"
+      }
+    ]
+  },
+  {
+    "name": "Siper",
+    "icon": "🔐",
+    "endpoints": [
+      {
+        "path": "/gks-api/v1/fraud-notifications/malware",
+        "method": "POST",
+        "statusCode": 200,
+        "contentType": "application/json",
+        "response": null
+      },
+      {
+        "path": "/gks-api/v1/fraud-notifications/malware",
+        "method": "POST",
+        "statusCode": 400,
+        "contentType": "application/json",
+        "response": "{\n  \"errors\": [\n    {\n      \"property\": \"identityNumber\",\n      \"description\": \"Kimlik numarası alanı 11 karakter olarak girilmelidir.\"\n    },\n    {\n      \"property\": \"deviceModel\",\n      \"description\": \"Cihaz model bilgisi alanı en fazla 120 karakter uzunluğunda girilmelidir.\"\n    },\n    {\n      \"property\": \"lastDetectionDate\",\n      \"description\": \"Son görülme zamanı geçmişe yönelik, son 5 dakika içerisinde olmalıdır.\"\n    }\n  ]\n}"
+      },
+      {
+        "path": "/gks-api/v1/fraud-notifications/victim",
+        "method": "POST",
+        "statusCode": 200,
+        "contentType": "application/json",
+        "response": null
+      },
+      {
+        "path": "/gks-api/v1/fraud-notifications/victim",
+        "method": "POST",
+        "statusCode": 400,
+        "contentType": "application/json",
+        "response": "{\n  \"errors\": [\n    {\n      \"property\": \"accountOwner\",\n      \"description\": \"Mağdur bilgisi minimum 3 maksimum 140 karakter uzunluğunda geçerli bir değer girilmelidir.\"\n    },\n    {\n      \"property\": \"fraudType\",\n      \"description\": \"Dolandırıcılık tipi alanı geçerli bir değer girilmelidir.\"\n    },\n    {\n      \"property\": \"isIntermediaryAccount\",\n      \"description\": \"Aracı hesap mı alanı geçerli bir değer girilmelidir.\"\n    },\n    {\n      \"property\": \"isOwnDevice\",\n      \"description\": \"Kendi cihazı mı alanı geçerli bir değer girilmelidir.\"\n    },\n    {\n      \"property\": \"informStatus\",\n      \"description\": \"Bildirim statüs alanı 1=Ekleme, 2=Silme olarak geçerli bir değer girilmelidir.\"\n    },\n    {\n      \"property\": \"fraudOccurenceDate\",\n      \"description\": \"Vaka tarihi alanı geçerli bir değer girilmelidir.\"\n    },\n    {\n      \"property\": \"identityNumber\",\n      \"description\": \"Kimlik numarası 11 hane olacak şekilde geçerli bir değer girilmelidir.\"\n    }\n  ]\n}"
+      }
+    ]
+  }
+]
