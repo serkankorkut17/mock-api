@@ -40,6 +40,8 @@ public class RestApiPanel extends JPanel {
     private JTextArea jsonArea;
     private JButton endpointsToggleButton;
     private JPanel endpointsListPanel;
+    private JScrollPane endpointsScrollPane;
+    private JPanel endpointsContentPanel;
 
     public RestApiPanel(MockService mockService, TemplateService templateService, Consumer<String> logConsumer) {
         this.mockService = mockService;
@@ -186,9 +188,12 @@ public class RestApiPanel extends JPanel {
         // Small prettify button overlay in bottom-right corner
         JButton prettifyButton = new JButton("✨");
         prettifyButton.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 14));
+        prettifyButton.setOpaque(true);
         prettifyButton.setBackground(new Color(103, 58, 183));
         prettifyButton.setForeground(Color.WHITE);
         prettifyButton.setFocusPainted(false);
+        prettifyButton.setBorderPainted(false);
+        prettifyButton.setContentAreaFilled(true);
         prettifyButton.setToolTipText("Format JSON");
         prettifyButton.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(81, 45, 168)),
@@ -227,8 +232,11 @@ public class RestApiPanel extends JPanel {
 
         JButton clearButton = new JButton("Clear");
         clearButton.setFont(new Font(UI_FONT, Font.PLAIN, 12));
+        clearButton.setOpaque(true);
         clearButton.setBackground(new Color(240, 240, 240));
         clearButton.setFocusPainted(false);
+        clearButton.setBorderPainted(false);
+        clearButton.setContentAreaFilled(true);
         clearButton.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(200, 200, 200)),
                 new EmptyBorder(8, 20, 8, 20)
@@ -238,9 +246,12 @@ public class RestApiPanel extends JPanel {
 
         JButton addButton = new JButton("✓ Add Mock");
         addButton.setFont(new Font("Segoe UI Symbol", Font.BOLD, 12));
+        addButton.setOpaque(true);
         addButton.setBackground(new Color(76, 175, 80));
         addButton.setForeground(Color.WHITE);
         addButton.setFocusPainted(false);
+        addButton.setBorderPainted(false);
+        addButton.setContentAreaFilled(true);
         addButton.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(56, 142, 60)),
                 new EmptyBorder(8, 25, 8, 25)
@@ -293,6 +304,9 @@ public class RestApiPanel extends JPanel {
         // Update the endpoints toggle button count
         updateEndpointsButton();
 
+        // If the list is expanded, refresh it automatically
+        refreshEndpointsListIfVisible();
+
         JOptionPane.showMessageDialog(this,
                 String.format("Mock endpoint created!\n\nEndpoint: %s\nMethod: %s\nStatus: %d", path, method, statusCode),
                 "Success",
@@ -306,8 +320,11 @@ public class RestApiPanel extends JPanel {
         // Toggle button
         endpointsToggleButton = new JButton("▶ Expand - Registered Endpoints (0)");
         endpointsToggleButton.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 11));
+        endpointsToggleButton.setOpaque(true);
         endpointsToggleButton.setBackground(new Color(245, 245, 245));
         endpointsToggleButton.setFocusPainted(false);
+        endpointsToggleButton.setBorderPainted(false);
+        endpointsToggleButton.setContentAreaFilled(true);
         endpointsToggleButton.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(200, 200, 200)),
                 new EmptyBorder(5, 10, 5, 10)
@@ -316,181 +333,26 @@ public class RestApiPanel extends JPanel {
         endpointsToggleButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         // List panel (initially hidden)
-        JPanel listPanel = new JPanel();
-        listPanel.setLayout(new BoxLayout(listPanel, BoxLayout.Y_AXIS));
-        listPanel.setBackground(new Color(248, 249, 250));
-        listPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
+        endpointsContentPanel = new JPanel();
+        endpointsContentPanel.setLayout(new BoxLayout(endpointsContentPanel, BoxLayout.Y_AXIS));
+        endpointsContentPanel.setBackground(new Color(248, 249, 250));
+        endpointsContentPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        JScrollPane scrollPane = new JScrollPane(listPanel);
-        scrollPane.setPreferredSize(new Dimension(500, 200));
-        scrollPane.setMinimumSize(new Dimension(400, 150));
-        scrollPane.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 225)));
-        scrollPane.setVisible(false);
-        scrollPane.getVerticalScrollBar().setUnitIncrement(16);
-
+        endpointsScrollPane = new JScrollPane(endpointsContentPanel);
+        endpointsScrollPane.setPreferredSize(new Dimension(500, 200));
+        endpointsScrollPane.setMinimumSize(new Dimension(400, 150));
+        endpointsScrollPane.setBorder(BorderFactory.createLineBorder(new Color(220, 220, 225)));
+        endpointsScrollPane.setVisible(false);
+        endpointsScrollPane.getVerticalScrollBar().setUnitIncrement(16);
 
         // Toggle action
         endpointsToggleButton.addActionListener(e -> {
-            boolean isVisible = scrollPane.isVisible();
-            scrollPane.setVisible(!isVisible);
+            boolean isVisible = endpointsScrollPane.isVisible();
+            endpointsScrollPane.setVisible(!isVisible);
 
             if (!isVisible) {
                 // Expand - refresh list
-                listPanel.removeAll();
-                List<MockEndpoint> endpoints = mockService.getMocksList();
-                System.out.println("DEBUG: Expanding endpoints list. Count: " + endpoints.size());
-                for (MockEndpoint ep : endpoints) {
-                    System.out.println("  - " + ep.getMethod() + " " + ep.getPath() + " (Status: " + ep.getStatusCode() + ")");
-                }
-                endpointsToggleButton.setText("▼ Collapse - Registered Endpoints (" + endpoints.size() + ")");
-
-                if (endpoints.isEmpty()) {
-                    JLabel emptyLabel = new JLabel("No endpoints registered yet");
-                    emptyLabel.setFont(new Font(UI_FONT, Font.ITALIC, 11));
-                    emptyLabel.setForeground(Color.GRAY);
-                    emptyLabel.setBorder(new EmptyBorder(10, 10, 10, 10));
-                    listPanel.add(emptyLabel);
-                } else {
-                    for (MockEndpoint endpoint : endpoints) {
-                        JPanel itemPanel = new JPanel(new BorderLayout(10, 5));
-                        itemPanel.setBackground(new Color(250, 250, 252));
-                        itemPanel.setBorder(BorderFactory.createCompoundBorder(
-                                BorderFactory.createLineBorder(new Color(220, 220, 225), 1),
-                                new EmptyBorder(12, 15, 12, 15)
-                        ));
-                        itemPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
-
-                        // Hover effect
-                        itemPanel.addMouseListener(new java.awt.event.MouseAdapter() {
-                            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                                itemPanel.setBackground(new Color(245, 247, 250));
-                                itemPanel.setBorder(BorderFactory.createCompoundBorder(
-                                        BorderFactory.createLineBorder(new Color(63, 81, 181), 1),
-                                        new EmptyBorder(12, 15, 12, 15)
-                                ));
-                            }
-
-                            public void mouseExited(java.awt.event.MouseEvent evt) {
-                                itemPanel.setBackground(new Color(250, 250, 252));
-                                itemPanel.setBorder(BorderFactory.createCompoundBorder(
-                                        BorderFactory.createLineBorder(new Color(220, 220, 225), 1),
-                                        new EmptyBorder(12, 15, 12, 15)
-                                ));
-                            }
-                        });
-
-                        // Left panel with method badge
-                        JPanel leftPanel = new JPanel(new BorderLayout(10, 0));
-                        leftPanel.setOpaque(false);
-
-                        // Method badge
-                        JLabel methodBadge = new JLabel(endpoint.getMethod());
-                        methodBadge.setFont(new Font(UI_FONT, Font.BOLD, 10));
-                        methodBadge.setHorizontalAlignment(SwingConstants.CENTER);
-                        methodBadge.setOpaque(true);
-                        methodBadge.setBorder(new EmptyBorder(4, 8, 4, 8));
-
-                        // Color based on method
-                        switch (endpoint.getMethod()) {
-                            case "GET":
-                                methodBadge.setBackground(new Color(76, 175, 80));
-                                break;
-                            case "POST":
-                                methodBadge.setBackground(new Color(33, 150, 243));
-                                break;
-                            case "PUT":
-                                methodBadge.setBackground(new Color(255, 152, 0));
-                                break;
-                            case "DELETE":
-                                methodBadge.setBackground(new Color(244, 67, 54));
-                                break;
-                            case "PATCH":
-                                methodBadge.setBackground(new Color(156, 39, 176));
-                                break;
-                            default:
-                                methodBadge.setBackground(new Color(96, 125, 139));
-                        }
-                        methodBadge.setForeground(Color.WHITE);
-
-                        leftPanel.add(methodBadge, BorderLayout.WEST);
-
-                        // Info panel
-                        JPanel infoPanel = new JPanel();
-                        infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
-                        infoPanel.setOpaque(false);
-
-                        JLabel pathLabel = new JLabel(endpoint.getPath());
-                        pathLabel.setFont(new Font(MONO_FONT, Font.BOLD, 13));
-                        pathLabel.setForeground(new Color(33, 33, 33));
-
-                        JLabel detailsLabel = new JLabel(String.format("Status: %d  •  Content-Type: %s",
-                                endpoint.getStatusCode(),
-                                endpoint.getContentType() != null ? endpoint.getContentType() : "application/json"));
-                        detailsLabel.setFont(new Font(UI_FONT, Font.PLAIN, 10));
-                        detailsLabel.setForeground(new Color(117, 117, 117));
-
-                        infoPanel.add(pathLabel);
-                        infoPanel.add(Box.createVerticalStrut(3));
-                        infoPanel.add(detailsLabel);
-
-                        leftPanel.add(infoPanel, BorderLayout.CENTER);
-
-                        // Delete button with modern design
-                        JButton deleteBtn = new JButton("✕");
-                        deleteBtn.setFont(new Font("Segoe UI Symbol", Font.BOLD, 18));
-                        deleteBtn.setPreferredSize(new Dimension(36, 36));
-                        deleteBtn.setBackground(new Color(244, 67, 54));
-                        deleteBtn.setForeground(Color.WHITE);
-                        deleteBtn.setFocusPainted(false);
-                        deleteBtn.setBorder(BorderFactory.createEmptyBorder());
-                        deleteBtn.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
-                        deleteBtn.setToolTipText("Delete this endpoint");
-
-                        // Hover effect for delete button
-                        deleteBtn.addMouseListener(new java.awt.event.MouseAdapter() {
-                            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                                deleteBtn.setBackground(new Color(211, 47, 47));
-                            }
-
-                            public void mouseExited(java.awt.event.MouseEvent evt) {
-                                deleteBtn.setBackground(new Color(244, 67, 54));
-                            }
-                        });
-
-                        deleteBtn.addActionListener(evt -> {
-                            int confirm = JOptionPane.showConfirmDialog(this,
-                                    "Are you sure you want to delete this endpoint?\n\n" +
-                                            endpoint.getMethod() + " " + endpoint.getPath(),
-                                    "Delete Endpoint",
-                                    JOptionPane.YES_NO_OPTION,
-                                    JOptionPane.WARNING_MESSAGE);
-
-                            if (confirm == JOptionPane.YES_OPTION) {
-                                boolean removed = mockService.removeMock(endpoint.getPath(), endpoint.getMethod());
-                                if (removed) {
-                                    logConsumer.accept(String.format("🗑️ Endpoint deleted: %s %s\n",
-                                            endpoint.getMethod(), endpoint.getPath()));
-
-                                    // Refresh the list
-                                    endpointsToggleButton.doClick();
-                                    endpointsToggleButton.doClick();
-                                }
-                            }
-                        });
-
-                        itemPanel.add(leftPanel, BorderLayout.CENTER);
-                        itemPanel.add(deleteBtn, BorderLayout.EAST);
-                        listPanel.add(itemPanel);
-                        listPanel.add(Box.createVerticalStrut(8)); // Space between items
-                    }
-                }
-
-                listPanel.revalidate();
-                listPanel.repaint();
-                scrollPane.revalidate();
-                scrollPane.repaint();
-                endpointsListPanel.revalidate();
-                endpointsListPanel.repaint();
+                refreshEndpointsList();
             } else {
                 // Collapse
                 endpointsToggleButton.setText("▶ Expand - Registered Endpoints (" + mockService.getMocksList().size() + ")");
@@ -498,89 +360,177 @@ public class RestApiPanel extends JPanel {
         });
 
         endpointsListPanel.add(endpointsToggleButton, BorderLayout.NORTH);
-        endpointsListPanel.add(scrollPane, BorderLayout.CENTER);
+        endpointsListPanel.add(endpointsScrollPane, BorderLayout.CENTER);
 
         return endpointsListPanel;
     }
 
-    private void updateEndpointsList(JPanel listContent) {
-        listContent.removeAll();
+    private void refreshEndpointsList() {
+        endpointsContentPanel.removeAll();
         List<MockEndpoint> endpoints = mockService.getMocksList();
 
+        System.out.println("DEBUG: Refreshing endpoints list. Count: " + endpoints.size());
+        for (MockEndpoint ep : endpoints) {
+            System.out.println("  - " + ep.getMethod() + " " + ep.getPath() + " (Status: " + ep.getStatusCode() + ")");
+        }
+
+        endpointsToggleButton.setText("▼ Collapse - Registered Endpoints (" + endpoints.size() + ")");
+
         if (endpoints.isEmpty()) {
-            JLabel emptyLabel = new JLabel("No endpoints configured yet");
+            JLabel emptyLabel = new JLabel("No endpoints registered yet");
             emptyLabel.setFont(new Font(UI_FONT, Font.ITALIC, 11));
             emptyLabel.setForeground(Color.GRAY);
             emptyLabel.setBorder(new EmptyBorder(10, 10, 10, 10));
-            listContent.add(emptyLabel);
+            endpointsContentPanel.add(emptyLabel);
         } else {
             for (MockEndpoint endpoint : endpoints) {
-                JPanel endpointPanel = new JPanel(new BorderLayout(5, 5));
-                endpointPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 40));
-                endpointPanel.setBackground(Color.WHITE);
-                endpointPanel.setBorder(BorderFactory.createCompoundBorder(
-                        BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(230, 230, 230)),
-                        new EmptyBorder(5, 10, 5, 10)
+                JPanel itemPanel = new JPanel(new BorderLayout(10, 5));
+                itemPanel.setBackground(new Color(250, 250, 252));
+                itemPanel.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createLineBorder(new Color(220, 220, 225), 1),
+                        new EmptyBorder(12, 15, 12, 15)
                 ));
+                itemPanel.setMaximumSize(new Dimension(Integer.MAX_VALUE, 80));
 
-                String methodColor = getMethodColor(endpoint.getMethod());
-                JLabel methodLabel = new JLabel(endpoint.getMethod());
-                methodLabel.setFont(new Font(MONO_FONT, Font.BOLD, 10));
-                methodLabel.setForeground(Color.decode(methodColor));
-                methodLabel.setPreferredSize(new Dimension(60, 20));
+                // Hover effect
+                itemPanel.addMouseListener(new java.awt.event.MouseAdapter() {
+                    public void mouseEntered(java.awt.event.MouseEvent evt) {
+                        itemPanel.setBackground(new Color(245, 247, 250));
+                        itemPanel.setBorder(BorderFactory.createCompoundBorder(
+                                BorderFactory.createLineBorder(new Color(63, 81, 181), 1),
+                                new EmptyBorder(12, 15, 12, 15)
+                        ));
+                    }
 
-                JLabel pathLabel = new JLabel(endpoint.getPath());
-                pathLabel.setFont(new Font(MONO_FONT, Font.PLAIN, 11));
-
-                JLabel statusLabel = new JLabel(String.valueOf(endpoint.getStatusCode()));
-                statusLabel.setFont(new Font(MONO_FONT, Font.PLAIN, 10));
-                statusLabel.setForeground(endpoint.getStatusCode() >= 400 ? Color.RED : new Color(76, 175, 80));
-
-                JButton deleteButton = new JButton("✕");
-                deleteButton.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 10));
-                deleteButton.setBackground(new Color(244, 67, 54));
-                deleteButton.setForeground(Color.WHITE);
-                deleteButton.setFocusPainted(false);
-                deleteButton.setBorder(new EmptyBorder(2, 8, 2, 8));
-                deleteButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-                deleteButton.addActionListener(e -> {
-                    mockService.removeMock(endpoint.getPath(), endpoint.getMethod());
-                    updateEndpointsList(listContent);
-                    updateEndpointsButton();
-                    listContent.revalidate();
-                    listContent.repaint();
+                    public void mouseExited(java.awt.event.MouseEvent evt) {
+                        itemPanel.setBackground(new Color(250, 250, 252));
+                        itemPanel.setBorder(BorderFactory.createCompoundBorder(
+                                BorderFactory.createLineBorder(new Color(220, 220, 225), 1),
+                                new EmptyBorder(12, 15, 12, 15)
+                        ));
+                    }
                 });
 
-                JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
+                // Left panel with method badge
+                JPanel leftPanel = new JPanel(new BorderLayout(10, 0));
                 leftPanel.setOpaque(false);
-                leftPanel.add(methodLabel);
-                leftPanel.add(pathLabel);
 
-                JPanel rightPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT, 10, 0));
-                rightPanel.setOpaque(false);
-                rightPanel.add(statusLabel);
-                rightPanel.add(deleteButton);
+                // Method badge
+                JLabel methodBadge = new JLabel(endpoint.getMethod());
+                methodBadge.setFont(new Font(UI_FONT, Font.BOLD, 10));
+                methodBadge.setHorizontalAlignment(SwingConstants.CENTER);
+                methodBadge.setOpaque(true);
+                methodBadge.setBorder(new EmptyBorder(4, 8, 4, 8));
 
-                endpointPanel.add(leftPanel, BorderLayout.WEST);
-                endpointPanel.add(rightPanel, BorderLayout.EAST);
+                // Color based on method
+                switch (endpoint.getMethod()) {
+                    case "GET":
+                        methodBadge.setBackground(new Color(76, 175, 80));
+                        break;
+                    case "POST":
+                        methodBadge.setBackground(new Color(33, 150, 243));
+                        break;
+                    case "PUT":
+                        methodBadge.setBackground(new Color(255, 152, 0));
+                        break;
+                    case "DELETE":
+                        methodBadge.setBackground(new Color(244, 67, 54));
+                        break;
+                    case "PATCH":
+                        methodBadge.setBackground(new Color(156, 39, 176));
+                        break;
+                    default:
+                        methodBadge.setBackground(new Color(96, 125, 139));
+                }
+                methodBadge.setForeground(Color.WHITE);
 
-                listContent.add(endpointPanel);
+                leftPanel.add(methodBadge, BorderLayout.WEST);
+
+                // Info panel
+                JPanel infoPanel = new JPanel();
+                infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+                infoPanel.setOpaque(false);
+
+                JLabel pathLabel = new JLabel(endpoint.getPath());
+                pathLabel.setFont(new Font(MONO_FONT, Font.BOLD, 13));
+                pathLabel.setForeground(new Color(33, 33, 33));
+
+                JLabel detailsLabel = new JLabel(String.format("Status: %d  •  Content-Type: %s",
+                        endpoint.getStatusCode(),
+                        endpoint.getContentType() != null ? endpoint.getContentType() : "application/json"));
+                detailsLabel.setFont(new Font(UI_FONT, Font.PLAIN, 10));
+                detailsLabel.setForeground(new Color(117, 117, 117));
+
+                infoPanel.add(pathLabel);
+                infoPanel.add(Box.createVerticalStrut(3));
+                infoPanel.add(detailsLabel);
+
+                leftPanel.add(infoPanel, BorderLayout.CENTER);
+
+                // Delete button with modern design
+                JButton deleteBtn = new JButton("✕");
+                deleteBtn.setFont(new Font("Segoe UI Symbol", Font.BOLD, 18));
+                deleteBtn.setPreferredSize(new Dimension(36, 36));
+                deleteBtn.setOpaque(true);
+                deleteBtn.setBackground(new Color(244, 67, 54));
+                deleteBtn.setForeground(Color.WHITE);
+                deleteBtn.setFocusPainted(false);
+                deleteBtn.setBorderPainted(false);
+                deleteBtn.setContentAreaFilled(true);
+                deleteBtn.setBorder(BorderFactory.createEmptyBorder());
+                deleteBtn.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
+                deleteBtn.setToolTipText("Delete this endpoint");
+
+                // Hover effect for delete button
+                deleteBtn.addMouseListener(new java.awt.event.MouseAdapter() {
+                    public void mouseEntered(java.awt.event.MouseEvent evt) {
+                        deleteBtn.setBackground(new Color(211, 47, 47));
+                    }
+
+                    public void mouseExited(java.awt.event.MouseEvent evt) {
+                        deleteBtn.setBackground(new Color(244, 67, 54));
+                    }
+                });
+
+                deleteBtn.addActionListener(evt -> {
+                    int confirm = JOptionPane.showConfirmDialog(this,
+                            "Are you sure you want to delete this endpoint?\n\n" +
+                                    endpoint.getMethod() + " " + endpoint.getPath(),
+                            "Delete Endpoint",
+                            JOptionPane.YES_NO_OPTION,
+                            JOptionPane.WARNING_MESSAGE);
+
+                    if (confirm == JOptionPane.YES_OPTION) {
+                        boolean removed = mockService.removeMock(endpoint.getPath(), endpoint.getMethod());
+                        if (removed) {
+                            logConsumer.accept(String.format("🗑️ Endpoint deleted: %s %s\n",
+                                    endpoint.getMethod(), endpoint.getPath()));
+
+                            // Refresh the list
+                            refreshEndpointsList();
+                        }
+                    }
+                });
+
+                itemPanel.add(leftPanel, BorderLayout.CENTER);
+                itemPanel.add(deleteBtn, BorderLayout.EAST);
+                endpointsContentPanel.add(itemPanel);
+                endpointsContentPanel.add(Box.createVerticalStrut(8)); // Space between items
             }
         }
 
-        listContent.revalidate();
-        listContent.repaint();
+        endpointsContentPanel.revalidate();
+        endpointsContentPanel.repaint();
+        endpointsScrollPane.revalidate();
+        endpointsScrollPane.repaint();
+        endpointsListPanel.revalidate();
+        endpointsListPanel.repaint();
     }
 
-    private String getMethodColor(String method) {
-        return switch (method) {
-            case "GET" -> "#2196F3";
-            case "POST" -> "#4CAF50";
-            case "PUT" -> "#FF9800";
-            case "DELETE" -> "#F44336";
-            case "PATCH" -> "#9C27B0";
-            default -> "#666666";
-        };
+    private void refreshEndpointsListIfVisible() {
+        if (endpointsScrollPane != null && endpointsScrollPane.isVisible()) {
+            refreshEndpointsList();
+        }
     }
 
     private void updateEndpointsButton() {

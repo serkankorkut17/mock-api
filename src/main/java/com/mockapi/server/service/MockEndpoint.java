@@ -1,5 +1,8 @@
 package com.mockapi.server.service;
 
+import lombok.Getter;
+
+@Getter
 public class MockEndpoint {
     private final String path;
     private final String method;
@@ -19,24 +22,5 @@ public class MockEndpoint {
         this.contentType = contentType != null ? contentType : "application/json";
     }
 
-    public String getPath() {
-        return path;
-    }
-
-    public String getMethod() {
-        return method;
-    }
-
-    public int getStatusCode() {
-        return statusCode;
-    }
-
-    public String getResponse() {
-        return response;
-    }
-
-    public String getContentType() {
-        return contentType;
-    }
 }
 

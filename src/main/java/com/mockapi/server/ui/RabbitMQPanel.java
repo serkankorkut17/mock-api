@@ -164,9 +164,12 @@ public class RabbitMQPanel extends JPanel {
         // Small prettify button overlay in bottom-right corner
         JButton rabbitPrettifyButton = new JButton("✨");
         rabbitPrettifyButton.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 14));
+        rabbitPrettifyButton.setOpaque(true);
         rabbitPrettifyButton.setBackground(new Color(103, 58, 183));
         rabbitPrettifyButton.setForeground(Color.WHITE);
         rabbitPrettifyButton.setFocusPainted(false);
+        rabbitPrettifyButton.setBorderPainted(false);
+        rabbitPrettifyButton.setContentAreaFilled(true);
         rabbitPrettifyButton.setToolTipText("Format JSON");
         rabbitPrettifyButton.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(81, 45, 168)),
@@ -205,8 +208,11 @@ public class RabbitMQPanel extends JPanel {
 
         JButton clearButton = new JButton("Clear");
         clearButton.setFont(new Font(UI_FONT, Font.PLAIN, 12));
+        clearButton.setOpaque(true);
         clearButton.setBackground(new Color(240, 240, 240));
         clearButton.setFocusPainted(false);
+        clearButton.setBorderPainted(false);
+        clearButton.setContentAreaFilled(true);
         clearButton.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(200, 200, 200)),
             new EmptyBorder(8, 20, 8, 20)
@@ -216,9 +222,12 @@ public class RabbitMQPanel extends JPanel {
 
         JButton sendButton = new JButton("→ Send Message");
         sendButton.setFont(new Font("Segoe UI Symbol", Font.BOLD, 12));
+        sendButton.setOpaque(true);
         sendButton.setBackground(new Color(255, 87, 34));
         sendButton.setForeground(Color.WHITE);
         sendButton.setFocusPainted(false);
+        sendButton.setBorderPainted(false);
+        sendButton.setContentAreaFilled(true);
         sendButton.setBorder(BorderFactory.createCompoundBorder(
             BorderFactory.createLineBorder(new Color(230, 74, 25)),
             new EmptyBorder(8, 25, 8, 25)
@@ -311,8 +320,11 @@ public class RabbitMQPanel extends JPanel {
         // Toggle button
         messagesToggleButton = new JButton("▶ Expand - Sent Messages (0)");
         messagesToggleButton.setFont(new Font("Segoe UI Symbol", Font.PLAIN, 11));
+        messagesToggleButton.setOpaque(true);
         messagesToggleButton.setBackground(new Color(245, 245, 245));
         messagesToggleButton.setFocusPainted(false);
+        messagesToggleButton.setBorderPainted(false);
+        messagesToggleButton.setContentAreaFilled(true);
         messagesToggleButton.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(new Color(200, 200, 200)),
                 new EmptyBorder(5, 10, 5, 10)
