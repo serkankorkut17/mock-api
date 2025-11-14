@@ -27,12 +27,12 @@ public class TemplateService {
      */
     private void loadTemplates() {
         try {
-            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("templates.json");
+            InputStream inputStream = getClass().getClassLoader().getResourceAsStream("api_templates.json");
             if (inputStream != null) {
                 categories = objectMapper.readValue(inputStream, new TypeReference<List<TemplateCategory>>() {});
                 System.out.println("✅ Loaded " + categories.size() + " template categories");
             } else {
-                System.out.println("⚠️ templates.json not found, using empty list");
+                System.out.println("⚠️ api_templates.json not found, using empty list");
                 categories = new ArrayList<>();
             }
         } catch (IOException e) {
